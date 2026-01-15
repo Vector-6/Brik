@@ -1,0 +1,21 @@
+# Allow all search engines to crawl the site
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://brik.io/sitemap.xml
+
+# Crawl delay (optional, helps prevent server overload)
+Crawl-delay: 1
+
+# Disallow crawling of API routes (optional)
+Disallow: /api/
+Disallow: /_next/
+
+# Allow specific important pages
+Allow: /swap
+Allow: /explore
+Allow: /portfolio
+Allow: /news
+Allow: /about
+Allow: /contact
