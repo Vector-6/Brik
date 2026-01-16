@@ -28,6 +28,8 @@ import {
 } from "lucide-react";
 import type { Token } from "@/lib/types/token.types";
 import { Z_INDEX } from "@/lib/constants/zIndex";
+import { useSwapRewards } from "../hooks/useSwapRewards";
+import { calculateSwapMetrics } from "@/lib/utils/swap-fees";
 
 // ============================================================================
 // Props
@@ -42,6 +44,7 @@ export interface SwapSuccessModalProps {
   toAmount: string;
   txHash?: string;
   chainId?: number;
+  quoteData?: Record<string, any>;
 }
 
 // ============================================================================
@@ -77,6 +80,7 @@ export function SwapSuccessModal({
   toAmount,
   txHash,
   chainId,
+  quoteData,
 }: SwapSuccessModalProps) {
   // ============================================================================
   // State Management
@@ -87,6 +91,54 @@ export function SwapSuccessModal({
   const [hasAnnounced, setHasAnnounced] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const doneButtonRef = useRef<HTMLButtonElement>(null);
+
+  // ============================================================================
+  // Rewards Integration
+  // ============================================================================
+
+  const { handleSwapSuccess } = useSwapRewards();
+
+  // Trigger rewards verification when swap is successful
+  useEffect(() => {
+    if (isOpen && txHash && chainId && quoteData) {
+      // Extract token price from quoteData (LiFi route object)
+      // Try multiple possible locations for the token price
+      const fromTokenPrice =
+        quoteData?.fromToken?.priceUSD ||
+        quoteData?.action?.fromToken?.priceUSD ||
+        quoteData?.steps?.[0]?.action?.fromToken?.priceUSD ||
+        fromToken.marketData?.price ||
+        0;
+
+      console.log('Debug - fromAmount:', fromAmount);
+      console.log('Debug - fromTokenPrice:', fromTokenPrice);
+      console.log('Debug - quoteData:', quoteData);
+      console.log('Debug - fromToken.marketData:', fromToken.marketData);
+
+      // Calculate swap metrics
+      const { swapValueUsd, brikFeeUsd } = calculateSwapMetrics(
+        fromAmount,
+        fromTokenPrice
+      );
+
+      console.log('Debug - swapValueUsd:', swapValueUsd);
+      console.log('Debug - brikFeeUsd:', brikFeeUsd);
+
+      // Only trigger if we have valid values
+      if (swapValueUsd > 0 && brikFeeUsd > 0) {
+        // Trigger rewards verification
+        handleSwapSuccess({
+          txHash,
+          chainId,
+          quoteData,
+          swapValueUsd,
+          brikFeeUsd,
+        });
+      } else {
+        console.error('Invalid swap metrics - cannot verify rewards. SwapValueUsd:', swapValueUsd, 'BrikFeeUsd:', brikFeeUsd);
+      }
+    }
+  }, [isOpen, txHash, chainId, quoteData, fromAmount, fromToken, handleSwapSuccess]);
 
   // ============================================================================
   // Detect Mobile Viewport for Responsive Animations

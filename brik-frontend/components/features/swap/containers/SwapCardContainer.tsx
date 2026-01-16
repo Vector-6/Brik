@@ -555,6 +555,7 @@ export default function SwapCardContainer() {
             toAmount={toAmount}
             txHash={latestConfirmedTx?.hash}
             chainId={latestConfirmedTx?.chainId ?? fromToken.currentChainId}
+            quoteData={modalRoute as unknown as Record<string, any>}
           />
         )}
 

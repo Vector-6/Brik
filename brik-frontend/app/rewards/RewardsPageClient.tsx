@@ -9,7 +9,7 @@ import {
   fetchMysteryBoxInfo,
   fetchReferralStats,
 } from "@/lib/api/endpoints/rewards";
-import RewardsTopSection from "@/components/features/rewards/RewardsTopSection";
+import RewardsOverviewPanel from "@/components/features/rewards/RewardsOverviewPanel";
 import MysteryBoxesSection from "@/components/features/rewards/MysteryBoxesSection";
 import RewardsStatsCards from "@/components/features/rewards/RewardsStatsCards";
 import ReferralRewardsCard from "@/components/features/rewards/ReferralRewardsCard";
@@ -108,11 +108,11 @@ export default function RewardsPageClient() {
       {/* Main Content */}
       <div className="relative z-10 pt-32 pb-24 px-4 sm:px-4 md:px-6 lg:px-8 xl:px-12">
         <div className="max-w-[95%] xl:max-w-[92%] 2xl:max-w-[90%] mx-auto space-y-8">
-          {/* Top Progress Section */}
-          <RewardsTopSection
+          {/* Rewards Overview Panel - "Above the Fold" */}
+          <RewardsOverviewPanel
             overview={overview}
             cashbackProgress={cashbackProgress}
-            referralStats={referralStats}
+            mysteryBoxInfo={mysteryBoxInfo}
           />
 
           {/* Mystery Boxes Section */}

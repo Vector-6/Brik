@@ -73,7 +73,7 @@ export default function ReferralRewardsCard({
           whileTap={{ scale: 0.98 }}
           onClick={handleCreateCode}
           disabled={isCreating || !!referralStats}
-          className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-burbank font-bold flex items-center justify-center gap-2 shadow-lg hover:from-purple-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-Inter font-bold flex items-center justify-center gap-2 shadow-lg hover:from-purple-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <UserPlus className="w-5 h-5" />
           {isCreating

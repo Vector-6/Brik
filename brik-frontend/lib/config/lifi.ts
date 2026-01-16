@@ -84,8 +84,9 @@ const defaultRouteOptions: RouteOptions = {
   // Allow chain switching if needed for the route
   allowSwitchChain: true,
 
-  // Fee configuration (optional)
-  fee: 0.0025, // 0.25% platform fee if needed
+  // Fee configuration (Brik platform fee)
+  // TEST ENVIRONMENT: 50% fee for testing
+  fee: 0.5, // 50% platform fee (TEST ONLY)
 };
 
 // ============================================================================
@@ -120,6 +121,9 @@ const sdkConfig: SDKConfig = {
 
   // Preload chain information for better performance
   preloadChains: true,
+
+  // Disable package update checks to avoid CSP violations
+  disableVersionCheck: true,
 
   // NOTE: Providers are NOT configured here because they need access to wagmi hooks
   // which are only available in React component context. The EVM provider will be

@@ -3,10 +3,8 @@
 import { motion } from "framer-motion";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { ClaimableRewards, RewardsOverview } from "@/lib/api/endpoints/rewards";
-import { claimRewards } from "@/lib/api/endpoints/rewards";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
 import { useState } from "react";
+import ClaimRewardModal from "./ClaimRewardModal";
 
 interface RewardsStatsCardsProps {
   claimable?: ClaimableRewards;
@@ -14,17 +12,26 @@ interface RewardsStatsCardsProps {
   walletAddress: string;
 }
 
-// Mock data for USDC Rewards chart - replace with real data from API
-const mockChartData = [
-  { date: "Dec 16", value: 0 },
-  { date: "Dec 17", value: 0.002 },
-  { date: "Dec 18", value: 0.004 },
-  { date: "Dec 19", value: 0.006 },
-  { date: "Dec 20", value: 0.008 },
-  { date: "Dec 21", value: 0.01 },
-  { date: "Dec 22", value: 0.011 },
-  { date: "Dec 23", value: 0.012 },
-];
+// Generate chart data based on user's actual claimable rewards
+const generateChartData = (claimableUsd: number) => {
+  const today = new Date();
+  const data = [];
+
+  // Generate 8 data points (last 8 days)
+  for (let i = 7; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    // Simulate cumulative growth: rewards accumulate over time
+    const progress = (7 - i) / 7;
+    const value = claimableUsd * progress;
+
+    data.push({ date: dateStr, value: Math.max(0, value) });
+  }
+
+  return data;
+};
 
 const QUESTS = [
   {
@@ -54,46 +61,13 @@ export default function RewardsStatsCards({
   overview,
   walletAddress,
 }: RewardsStatsCardsProps) {
-  const queryClient = useQueryClient();
-  const [isClaiming, setIsClaiming] = useState(false);
-
-  const claimMutation = useMutation({
-    mutationFn: (type: "cashback" | "referral") =>
-      claimRewards({
-        type,
-        walletAddress,
-      }),
-    onSuccess: (data) => {
-      toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: ["rewards-overview", walletAddress] });
-      queryClient.invalidateQueries({ queryKey: ["claimable-rewards", walletAddress] });
-    },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to claim rewards");
-    },
-    onSettled: () => {
-      setIsClaiming(false);
-    },
-  });
-
-  const handleClaimAll = async () => {
-    setIsClaiming(true);
-    try {
-      // Claim cashback if available
-      if (claimable && claimable.cashbackUsd > 0) {
-        await claimMutation.mutateAsync("cashback");
-      }
-      // Claim referral if available
-      if (claimable && claimable.referralUsd > 0) {
-        await claimMutation.mutateAsync("referral");
-      }
-    } catch (error) {
-      // Error handled in mutation
-    }
-  };
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
 
   const claimableUsd = claimable?.totalUsd || 0;
-  const claimablePoints = 1500; // This would come from API
+  const claimablePoints = overview?.totalPoints || 0;
+
+  // Generate chart data based on user's actual claimable rewards
+  const chartData = generateChartData(claimableUsd);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -113,7 +87,7 @@ export default function RewardsStatsCards({
 
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={mockChartData}>
+            <LineChart data={chartData}>
               <Line
                 type="monotone"
                 dataKey="value"
@@ -191,11 +165,11 @@ export default function RewardsStatsCards({
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={handleClaimAll}
-          disabled={isClaiming || claimableUsd === 0}
+          onClick={() => setIsClaimModalOpen(true)}
+          disabled={claimableUsd === 0}
           className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-Inter font-bold text-lg shadow-lg hover:from-purple-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isClaiming ? "Claiming..." : "Claim All"}
+          Claim All
         </motion.button>
       </motion.div>
 
@@ -288,6 +262,20 @@ export default function RewardsStatsCards({
           ))}
         </div>
       </motion.div>
+
+      {/* Claim Reward Modal */}
+      <ClaimRewardModal
+        isOpen={isClaimModalOpen}
+        onClose={() => setIsClaimModalOpen(false)}
+        walletAddress={walletAddress}
+        rewardBreakdown={{
+          cashbackUsd: claimable?.cashbackUsd || 0,
+          referralUsd: claimable?.referralUsd || 0,
+          mysteryBoxUsd: claimable?.mysteryBoxUsd || 0,
+          mysteryBoxIds: claimable?.mysteryBoxIds || [],
+          totalUsd: claimable?.totalUsd || 0,
+        }}
+      />
     </div>
   );
 }

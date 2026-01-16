@@ -20,8 +20,9 @@ import { RewardEvent, RewardEventDocument } from '../schemas/reward-event.schema
 @Injectable()
 export class CashbackService {
   private readonly logger = new Logger(CashbackService.name);
+  // TEST ENVIRONMENT: Fixed 5% cashback (was random 5-10%)
   private readonly CASHBACK_PERCENTAGE_MIN = 5; // 5%
-  private readonly CASHBACK_PERCENTAGE_MAX = 10; // 10%
+  private readonly CASHBACK_PERCENTAGE_MAX = 5; // TEST: Fixed 5% (was 10%)
 
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,

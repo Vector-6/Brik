@@ -50,6 +50,10 @@ import {
   RewardEvent,
   RewardEventSchema,
 } from './schemas/reward-event.schema';
+import {
+  ClaimHistory,
+  ClaimHistorySchema,
+} from './schemas/claim-history.schema';
 
 @Module({
   imports: [
@@ -65,6 +69,7 @@ import {
       { name: MysteryBox.name, schema: MysteryBoxSchema },
       { name: Payout.name, schema: PayoutSchema },
       { name: RewardEvent.name, schema: RewardEventSchema },
+      { name: ClaimHistory.name, schema: ClaimHistorySchema },
     ]),
     BlockchainModule,
   ],

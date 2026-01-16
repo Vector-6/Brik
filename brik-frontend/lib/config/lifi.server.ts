@@ -67,7 +67,8 @@ const defaultRouteOptions: RouteOptions = {
   slippage: 0.005, // 0.5%
   integrator: "Brik-Labs",
   allowSwitchChain: true,
-  fee: 0.0025, // 0.25% platform fee
+  // TEST ENVIRONMENT: 50% fee for testing
+  fee: 0.5, // 50% platform fee (TEST ONLY)
 };
 
 // ============================================================================
@@ -84,6 +85,9 @@ const serverSdkConfig: SDKConfig = {
   routeOptions: defaultRouteOptions,
   debug: process.env.NODE_ENV === "development",
   preloadChains: true,
+
+  // Disable package update checks to avoid CSP violations
+  disableVersionCheck: true,
 
   // API key included for server-side operations only
   ...(lifiApiKey && { apiKey: lifiApiKey }),

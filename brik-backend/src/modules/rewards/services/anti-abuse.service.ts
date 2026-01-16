@@ -23,10 +23,10 @@ export class AntiAbuseService {
   private readonly logger = new Logger(AntiAbuseService.name);
 
   // Daily limits
-  private readonly DAILY_CASHBACK_CAP_USD = 100; // Max $100 cashback per day
+  private readonly DAILY_CASHBACK_CAP_USD = 50; // Max $50 cashback per day
   private readonly DAILY_REFERRAL_CAP_USD = 50; // Max $50 referral earnings per day
-  private readonly MIN_SWAP_SIZE_USD = 25; // Minimum swap size
-  private readonly MIN_BRIK_FEE_USD = 0.05; // Minimum Brik fee
+  private readonly MIN_SWAP_SIZE_USD = 2; // TEST ENVIRONMENT: Minimum swap size $2 (was 25)
+  private readonly MIN_BRIK_FEE_USD = 0.01; // TEST ENVIRONMENT: Minimum Brik fee $0.01 (was 0.05)
   private readonly CLAIM_RATE_LIMIT_MINUTES = 1; // Min 1 minute between claims
   private readonly MAX_CLAIMS_PER_HOUR = 10; // Max 10 claims per hour
 

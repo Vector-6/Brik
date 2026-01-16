@@ -5,6 +5,7 @@ import Providers from "./providers";
 import { Toaster } from "react-hot-toast";
 import Navbar from "@/components/ui/layout/Navbar";
 import Footer from "@/components/ui/layout/Footer";
+import PersistentProgressWidget from "@/components/features/rewards/PersistentProgressWidget";
 import { WebVitals } from "./web-vitals";
 import {  burbankFont } from "@/lib/fonts";
 import NextTopLoader from "nextjs-toploader";
@@ -116,6 +117,7 @@ export default function RootLayout({
           {/* Add padding-top to account for fixed navbar */}
           <div className="q">{children}</div>
           <Footer />
+          <PersistentProgressWidget />
           <Toaster position="top-right" />
         </Providers>
       </body>

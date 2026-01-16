@@ -67,7 +67,7 @@ export const configuration = () => ({
       isGlobal: true,
       load: [configuration],
       cache: true, // Cache configuration for performance
-      expandVariables: true,
+      expandVariables: false, // Disable to prevent bcrypt hash expansion (contains $)
       envFilePath: ['.env.local', '.env'],
     }),
   ],

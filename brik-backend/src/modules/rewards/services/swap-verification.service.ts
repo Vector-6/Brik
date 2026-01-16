@@ -102,10 +102,42 @@ export class SwapVerificationService {
       const block = await client.getBlock({ blockNumber: receipt.blockNumber });
 
       // Extract token addresses from quote data
-      const fromToken = dto.quoteData?.action?.fromToken?.address || '';
-      const toToken = dto.quoteData?.action?.toToken?.address || '';
-      const fromAmount = dto.quoteData?.action?.fromAmount || '0';
-      const toAmount = dto.quoteData?.action?.toAmount || '0';
+      // LiFi route structure: try multiple possible paths
+      const fromToken =
+        dto.quoteData?.fromToken?.address ||
+        dto.quoteData?.action?.fromToken?.address ||
+        dto.quoteData?.steps?.[0]?.action?.fromToken?.address ||
+        'UNKNOWN';
+
+      const toToken =
+        dto.quoteData?.toToken?.address ||
+        dto.quoteData?.action?.toToken?.address ||
+        dto.quoteData?.steps?.[dto.quoteData.steps?.length - 1]?.action?.toToken?.address ||
+        'UNKNOWN';
+
+      const fromAmount =
+        dto.quoteData?.fromAmount ||
+        dto.quoteData?.action?.fromAmount ||
+        dto.quoteData?.steps?.[0]?.action?.fromAmount ||
+        '0';
+
+      const toAmount =
+        dto.quoteData?.toAmount ||
+        dto.quoteData?.action?.toAmount ||
+        dto.quoteData?.steps?.[dto.quoteData.steps?.length - 1]?.action?.toAmount ||
+        '0';
+
+      this.logger.debug(`Extracted tokens - from: ${fromToken}, to: ${toToken}`);
+
+      // If tokens are still unknown, log the full quoteData for debugging
+      if (fromToken === 'UNKNOWN' || toToken === 'UNKNOWN') {
+        this.logger.warn(
+          `Could not extract token addresses. QuoteData structure: ${JSON.stringify(dto.quoteData, null, 2)}`,
+        );
+        throw new BadRequestException(
+          'Unable to extract token information from quote data',
+        );
+      }
 
       // Create swap record
       const pointsEarned = Math.floor(dto.brikFeeUsd * 100); // Points = fee * 100

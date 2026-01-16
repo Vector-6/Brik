@@ -143,7 +143,7 @@ export class RewardsService {
             .find({ walletAddress: dto.walletAddress.toLowerCase(), createdAt: { $gte: today } })
             .exec();
           const totalToday = todayCashback.reduce((sum, b) => sum + b.cashbackAmountUsd, 0);
-          const maxAllowed = 100 - totalToday;
+          const maxAllowed = 50 - totalToday;
 
           if (maxAllowed > 0) {
             batch.cashbackAmountUsd = maxAllowed;

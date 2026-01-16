@@ -40,6 +40,12 @@ export class User {
   @Prop({ type: String, ref: 'ReferralCode' })
   referredByCodeId: string; // Code that referred them
 
+  @Prop({ type: Date })
+  referralLockedAt: Date; // Timestamp when referral was locked
+
+  @Prop({ default: false })
+  isReferralLocked: boolean; // Whether referral is currently locked
+
   @Prop({ default: 0 })
   swapsSinceLastCashback: number; // Counter for 3-swap cashback
 

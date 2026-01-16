@@ -33,6 +33,8 @@ export interface CashbackProgress {
 export interface ClaimableRewards {
   cashbackUsd: number;
   referralUsd: number;
+  mysteryBoxUsd: number;
+  mysteryBoxIds: string[]; // Array of mystery box IDs for claiming
   totalUsd: number;
 }
 

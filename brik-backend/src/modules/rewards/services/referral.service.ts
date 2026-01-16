@@ -25,6 +25,7 @@ export class ReferralService {
   private readonly logger = new Logger(ReferralService.name);
   private readonly REFERRAL_PERCENTAGE = 5; // 5%
   private readonly REQUIRED_REFEREE_SWAPS = 2; // Referee must complete 2 swaps
+  private readonly REFERRAL_LOCK_DAYS = 30; // Lock period: 30 days (users cannot change referrer for 30 days)
 
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -113,7 +114,21 @@ export class ReferralService {
       .exec();
 
     if (user && user.referredByCodeId) {
-      throw new BadRequestException('User already has a referrer');
+      // Check if referral is still locked
+      const isLocked = await this.isReferralLocked(walletAddress);
+      if (isLocked) {
+        const lockExpiry = await this.getReferralLockExpiry(walletAddress);
+        const daysRemaining = lockExpiry
+          ? Math.ceil((lockExpiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+          : 0;
+        throw new BadRequestException(
+          `Referral is locked. You cannot change your referrer for ${daysRemaining} more days.`,
+        );
+      }
+      // If not locked, allow referrer change (lock has expired)
+      this.logger.log(
+        `User ${walletAddress} changing referrer (lock expired)`,
+      );
     }
 
     // Prevent self-referral
@@ -132,6 +147,8 @@ export class ReferralService {
     }
 
     user.referredByCodeId = referralCode._id.toString();
+    user.isReferralLocked = true;
+    user.referralLockedAt = new Date();
     await user.save();
 
     // Update referral code stats
@@ -160,6 +177,17 @@ export class ReferralService {
 
     if (!user || !user.referredByCodeId) {
       return; // No referrer, no referral earnings
+    }
+
+    // Validate referral lock is active (this ensures referral integrity)
+    if (!user.isReferralLocked && user.referralLockedAt) {
+      // Check if lock should still be active
+      const shouldBeLocked = await this.isReferralLocked(walletAddress);
+      if (shouldBeLocked) {
+        // Fix inconsistent state
+        user.isReferralLocked = true;
+        await user.save();
+      }
     }
 
     // Get referral code
@@ -333,6 +361,53 @@ export class ReferralService {
   ): Promise<number> {
     const earnings = await this.getClaimableReferralEarnings(walletAddress);
     return earnings.reduce((sum, e) => sum + e.earningAmountUsd, 0);
+  }
+
+  /**
+   * Check if referral is locked for a user
+   * Returns true if locked, false if unlocked/expired
+   */
+  async isReferralLocked(walletAddress: string): Promise<boolean> {
+    const user = await this.userModel
+      .findOne({ walletAddress: walletAddress.toLowerCase() })
+      .exec();
+
+    if (!user || !user.isReferralLocked || !user.referralLockedAt) {
+      return false;
+    }
+
+    // Check if lock period has expired
+    const lockExpiresAt = new Date(user.referralLockedAt);
+    lockExpiresAt.setDate(lockExpiresAt.getDate() + this.REFERRAL_LOCK_DAYS);
+
+    const now = new Date();
+    if (now > lockExpiresAt) {
+      // Lock expired - unlock the referral
+      user.isReferralLocked = false;
+      await user.save();
+      this.logger.log(`Referral lock expired for ${walletAddress}`);
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Get referral lock expiry date
+   */
+  async getReferralLockExpiry(walletAddress: string): Promise<Date | null> {
+    const user = await this.userModel
+      .findOne({ walletAddress: walletAddress.toLowerCase() })
+      .exec();
+
+    if (!user || !user.isReferralLocked || !user.referralLockedAt) {
+      return null;
+    }
+
+    const lockExpiresAt = new Date(user.referralLockedAt);
+    lockExpiresAt.setDate(lockExpiresAt.getDate() + this.REFERRAL_LOCK_DAYS);
+
+    return lockExpiresAt;
   }
 
   /**

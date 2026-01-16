@@ -44,17 +44,18 @@ export default function NextStepsCard({
         <img src="/images/claim.png" alt="Next Steps" className="w-8 h-8" />
         Next Steps
       </h3>
-      <div className="space-y-3">
+      <div className="space-y-8 pl-3 pt-3">
         {steps.map((step) => (
-          <div key={step.id} className="flex items-center gap-3">
+          <div key={step.id} className="flex items-center gap-3 pr-4">
             <img src="/images/point.png" alt="Check" className="w-2 h-2" />
             <p
-              className={`text-sm flex-1 ${
+              className={`text-sm flex-1${
                 step.completed ? "text-gray-400 line-through" : "text-gray-300"
               }`}
             >
               {step.text}
             </p>
+            <img src="/images/vector.png" alt="Arrow" className="w-2 h-2 ml-auto opacity-60" />
           </div>
         ))}
       </div>

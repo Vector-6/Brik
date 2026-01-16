@@ -39,6 +39,7 @@ const ROUTE_MAP: Record<string, string> = {
   Portfolio: "/portfolio",
   Explore: "/explore",
   News: "/news",
+  Rewards: "/rewards",
   About: "/about",
   Careers: "/careers",
   Contact: "/contact",
@@ -60,6 +61,7 @@ const footerSections: FooterSection[] = [
       { label: "Portfolio", href: ROUTE_MAP["Portfolio"] },
       { label: "Explore", href: ROUTE_MAP["Explore"] },
       { label: "News", href: ROUTE_MAP["News"] },
+      { label: "Rewards", href: ROUTE_MAP["Rewards"] },
     ],
   },
   {

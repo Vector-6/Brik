@@ -31,7 +31,7 @@ import { Swap, SwapDocument } from '../schemas/swap.schema';
 export class MysteryBoxService {
   private readonly logger = new Logger(MysteryBoxService.name);
   private readonly MYSTERY_BOX_POOL_PERCENTAGE = 10; // 10% of fees
-  private readonly POINTS_COST = 100; // Points required to open a box
+  private readonly POINTS_COST = 50; // TEST ENVIRONMENT: Points required to open a box (was 1000)
 
   // Payout ranges (USD)
   private readonly PAYOUT_RANGES = {
@@ -207,16 +207,25 @@ export class MysteryBoxService {
 
   /**
    * Determine mystery box rarity based on probabilities
+   * Uses cumulative probability distribution
    */
   private determineRarity(): MysteryBoxRarity {
-    const random = Math.random();
+    const random = Math.random(); // 0.0 to 1.0
 
-    if (random < this.RARITY_PROBABILITIES[MysteryBoxRarity.ULTRA_RARE]) {
-      return MysteryBoxRarity.ULTRA_RARE;
-    } else if (random < this.RARITY_PROBABILITIES[MysteryBoxRarity.RARE]) {
-      return MysteryBoxRarity.RARE;
+    // Cumulative probabilities:
+    // 0.00 - 0.02: Ultra Rare (2%)
+    // 0.02 - 0.15: Rare (13%)
+    // 0.15 - 1.00: Common (85%)
+
+    const ultraRareThreshold = this.RARITY_PROBABILITIES[MysteryBoxRarity.ULTRA_RARE]; // 0.02
+    const rareThreshold = ultraRareThreshold + this.RARITY_PROBABILITIES[MysteryBoxRarity.RARE]; // 0.15
+
+    if (random < ultraRareThreshold) {
+      return MysteryBoxRarity.ULTRA_RARE; // 2%
+    } else if (random < rareThreshold) {
+      return MysteryBoxRarity.RARE; // 13%
     } else {
-      return MysteryBoxRarity.COMMON;
+      return MysteryBoxRarity.COMMON; // 85%
     }
   }
 

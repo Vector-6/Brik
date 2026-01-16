@@ -19,6 +19,7 @@ import {
   parseUnits,
   PublicClient,
   createPublicClient,
+  Chain,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import {
@@ -63,7 +64,7 @@ const ERC20_ABI = [
 @Injectable()
 export class PayoutExecutionService {
   private readonly logger = new Logger(PayoutExecutionService.name);
-  private readonly chains: Map<number, any>;
+  private readonly chains: Map<number, Chain>;
   private readonly publicClients: Map<number, PublicClient>;
 
   constructor(
@@ -71,7 +72,7 @@ export class PayoutExecutionService {
     private configService: ConfigService,
   ) {
     // Initialize chain configurations
-    this.chains = new Map([
+    this.chains = new Map<number, Chain>([
       [1, mainnet],
       [56, bsc],
       [137, polygon],
@@ -162,6 +163,7 @@ export class PayoutExecutionService {
         abi: ERC20_ABI,
         functionName: 'transfer',
         args: [payout.walletAddress as `0x${string}`, amountInUnits],
+        chain,
       });
 
       this.logger.log(`Payout transaction sent: ${txHash}`);

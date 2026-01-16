@@ -2,7 +2,7 @@
  * DTOs for claiming rewards
  */
 
-import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsOptional } from 'class-validator';
 
 export enum ClaimType {
   CASHBACK = 'cashback',
@@ -19,12 +19,15 @@ export class ClaimRewardsDto {
   @IsNotEmpty()
   walletAddress: string;
 
+  @IsOptional()
   @IsString()
   cashbackBatchId?: string; // For cashback claims
 
+  @IsOptional()
   @IsString()
   referralEarningIds?: string; // Comma-separated IDs for referral claims
 
+  @IsOptional()
   @IsString()
   mysteryBoxId?: string; // For mystery box payouts
 }

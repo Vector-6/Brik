@@ -36,7 +36,7 @@ import {
 } from './dto/mystery-box.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-@Controller('rewards')
+@Controller('api/rewards')
 export class RewardsController {
   constructor(
     private readonly rewardsService: RewardsService,
@@ -211,10 +211,28 @@ export class RewardsController {
       walletAddress,
     );
 
+    // Get unopened mystery box rewards
+    const mysteryBoxRewards = await this.mysteryBoxService.mysteryBoxModel
+      .find({
+        walletAddress: walletAddress.toLowerCase(),
+        status: 'opened', // Opened but not yet claimed
+      })
+      .exec();
+
+    const mysteryBoxTotal = mysteryBoxRewards.reduce(
+      (sum, box) => sum + box.payoutAmountUsd,
+      0,
+    );
+
+    // Return mystery box IDs for claiming
+    const mysteryBoxIds = mysteryBoxRewards.map((box) => box._id.toString());
+
     return {
       cashbackUsd: cashback,
       referralUsd: referral,
-      totalUsd: cashback + referral,
+      mysteryBoxUsd: mysteryBoxTotal,
+      mysteryBoxIds, // Array of IDs for claiming
+      totalUsd: cashback + referral + mysteryBoxTotal,
     };
   }
 }
